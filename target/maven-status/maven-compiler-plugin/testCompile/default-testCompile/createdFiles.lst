@@ -1,0 +1,10 @@
+Lesson7\pageObjects\ColorCompletionPage.class
+Lesson7\utils\ScrollPage.class
+Lesson7\pageObjects\ElementsPage.class
+Lesson7\core\BaseTest.class
+Lesson7\SelenideTests\DemoqaTest.class
+Lesson7\pageObjects\ProgressBarPage.class
+Lesson7\pageObjects\RegistrationPage.class
+Lesson7\pageObjects\MainPage.class
+Lesson7\properties\SelenideConfig.class
+Lesson7\utils\CalendarComponent.class
