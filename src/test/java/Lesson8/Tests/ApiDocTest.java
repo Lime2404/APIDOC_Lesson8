@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 
 import static io.restassured.RestAssured.given;
@@ -22,7 +23,6 @@ public class ApiDocTest {
 
     @Test
     @Tag("Test1")
-
     public void getApiDocTokenId() {
         logger.info("The test1 has passed successfully, token " + ApiDocUtils.getTokenId(url) + " has been received");
     }
@@ -30,8 +30,7 @@ public class ApiDocTest {
 //  5.1. Get a list of all books and verify that the request was completed correctly
     @Test
     @Tag("Test2")
-
-    public void getAllApiDocBookings(){
+    public void getAllApiDocBookings() {
 
         int bookingListSize = ApiDocUtils.getAllBookings(url).size();
         Assertions.assertNotEquals(0, bookingListSize);
@@ -56,12 +55,11 @@ public class ApiDocTest {
         String jsonData = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            // Читаем JSON файл и конвертируем его в объект User
             jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        System.out.println(jsonData);
+
         BookingCreation bookingCreation = given()
                 .body(jsonData)
                 .when()
@@ -76,45 +74,46 @@ public class ApiDocTest {
 //  5.4. Create booking with invalid data
     @Test
     @Tag("Test4")
-    public void postInvalidBooking(){}
+    public void postInvalidBooking() {
+    }
 
 //  5.5. Create booking with firstname =FirsrNameBook1
     @Test
     @Tag("Test5")
-    public void createPrivateBooking(){}
+    public void createPrivateBooking() {
+    }
 
 //  5.6. Update booking using valid data
     @Test
     @Tag("Test6")
-    public void getBooking(){
+    public void getBooking() {
         Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
 
         String visitorLastName = ApiDocUtils.getBookingInfo(ApiDocUtils.getAllBookings(url).get(0)).lastname;
-        Assertions.assertNotEquals(null, visitorLastName);
-
-        int bookingId = ApiDocUtils.getAllBookings(url).get(0);
+                int bookingId = ApiDocUtils.getAllBookings(url).get(0);
         logger.info("The booking id to be used is " + bookingId + " with last name " + visitorLastName);
 
-            File jsonFile = new File("src/test/resources/artifacts/Booking.json");
-            String jsonData = null;
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        logger.info("ожидаемый JSON на замену " + jsonData);
+        File jsonFile = new File("src/test/resources/artifacts/Booking.json");
+        String jsonData = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }   logger.info("ожидаемый JSON на замену " + jsonData);
 
         String token = ApiDocUtils.getTokenId(url);
         logger.info("Следующий шаг - подставить токен " + token + " для внесения изменений в бронь");
 
         BookingData updatedBooking = given()
-                    .body(jsonData)
-                    .header("Cookie", "token=" + token)
-                    .when()
-                    .put("booking/" + bookingId)
-                    .then()
-                    .extract().as(BookingData.class);
+                .body(jsonData)
+                .header("Cookie", "token=" + token)
+                .when()
+                .put("booking/" + bookingId)
+                .then()
+                .extract().as(BookingData.class);
+
+        Assertions.assertNotEquals(null, visitorLastName);
         Assertions.assertEquals("Alla Pugacheva", updatedBooking.getFirstname() + " " + updatedBooking.getLastname());
         logger.info("The updated booking with id: " + bookingId + " contains reservatoipn for " + updatedBooking.getLastname());
     }

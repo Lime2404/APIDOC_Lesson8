@@ -49,7 +49,6 @@ public class ApiDocUtils {
                 .when()
                 .get("booking/" + value)
                 .then()
-//                .then().log().all()
                 .extract().as(BookingData.class);
         return bookingData;
     }
