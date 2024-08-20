@@ -54,7 +54,7 @@ public class ApiDocUtils {
         return bookingData;
     }
 
-    public static BookingCreation createBooking(BookingData object){
+    public static BookingCreation createBooking(Object object){
         BookingCreation bookingCreation = given()
                 .body(object)
                 .when()

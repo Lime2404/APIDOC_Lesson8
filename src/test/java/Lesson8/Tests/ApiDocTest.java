@@ -61,15 +61,9 @@ public class ApiDocTest {
             e.printStackTrace();
         }
 
-        BookingCreation bookingCreation = given()
-                .body(jsonData)
-                .when()
-                .post("booking")
-                .then()
-                .extract().as(BookingCreation.class);
-        Assertions.assertNotEquals("", bookingCreation.bookingid);
-        Assertions.assertEquals("Alla", bookingCreation.booking.getFirstname());
-        logger.info("The booking id is " + bookingCreation.bookingid + ". The person full name is " + bookingCreation.booking.getFirstname() + " " + bookingCreation.booking.getLastname());
+        BookingCreation booking = ApiDocUtils.createBooking(jsonData);
+        Assertions.assertEquals("Alla", booking.booking.getFirstname());
+        logger.info("The booking id is " + booking.bookingid + ". The person full name is " + booking.booking.getFirstname() + " " + booking.booking.getLastname());
     }
 
 //  5.4. Create booking with invalid data
@@ -78,7 +72,7 @@ public class ApiDocTest {
     public void postInvalidBooking() {
     }
 
-//  5.5. Create booking with firstname =FirsrNameBook1
+//  5.5. Create booking with firstname = FirstNameBook1
     @Test
     @Tag("Test5")
     public void createPrivateBooking() {
@@ -98,7 +92,7 @@ public class ApiDocTest {
         Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
 
         String visitorLastName = ApiDocUtils.getBookingInfo(ApiDocUtils.getAllBookings(url).get(0)).lastname;
-                int bookingId = ApiDocUtils.getAllBookings(url).get(0);
+        int bookingId = ApiDocUtils.getAllBookings(url).get(0);
         logger.info("The booking id to be used is " + bookingId + " with last name " + visitorLastName);
 
         File jsonFile = new File("src/test/resources/artifacts/Booking.json");
