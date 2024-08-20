@@ -1,20 +1,18 @@
 package Lesson8.Tests;
 
-import Lesson8.BookingCreation;
-import Lesson8.BookingData;
-import Lesson8.Specifications;
-import Lesson8.SuccessReg;
+import Lesson8.Pojo.BookingCreation;
+import Lesson8.Pojo.BookingData;
+import Lesson8.Pojo.Bookings;
+import Lesson8.Specs.Specifications;
+import Lesson8.Pojo.SuccessReg;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import io.restassured.http.ContentType;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +71,7 @@ public class ApiDocTest {
 
     }
 
-    //  5.3. Create booking with valid data
+//  5.3. Create booking with valid data
     @Test
     @Tag("Test3")
     public void createBooking() {
@@ -95,7 +93,72 @@ public class ApiDocTest {
                 .then()
                 .extract().as(BookingCreation.class);
         Assertions.assertNotEquals("", bookingCreation.bookingid);
-        Assertions.assertEquals("Jim", bookingCreation.booking.getFirstname());
+        Assertions.assertEquals("Alla", bookingCreation.booking.getFirstname());
         logger.info("The booking id is " + bookingCreation.bookingid + ". The person full name is " + bookingCreation.booking.getFirstname() + " " + bookingCreation.booking.getLastname());
+    }
+
+//  5.4. Create booking with invalid data
+    @Test
+    @Tag("Test4")
+    public void postInvalidBooking(){}
+
+//  5.5. Create booking with firstname =FirsrNameBook1
+    @Test
+    @Tag("Test5")
+    public void createPrivateBooking(){}
+
+//  5.6. Update booking using valid data
+    @Test
+    @Tag("Test6")
+    public void getBooking(){
+        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
+        List<Bookings> bookings = given()
+                .when()
+                .get("booking")
+                .then()
+                .extract().body().jsonPath().getList("", Bookings.class);
+        List<Integer> ids = bookings.stream().map(x -> x.getBookingid()).collect(Collectors.toList());
+        BookingData bookingData = given()
+                .when()
+                .get("booking/" + ids.get(0))
+                .then()
+//                .then().log().all()
+                .extract().as(BookingData.class);
+//        Assertions.assertNotEquals(null, bookingData.getFirstname());
+        int bookingId = ids.get(0);
+        logger.info("The booking id to be used is " + bookingId + " with full name " + bookingData.getFirstname() + " " + bookingData.getLastname());
+
+            File jsonFile = new File("src/test/resources/artifacts/Booking.json");
+            String jsonData = null;
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                // Читаем JSON файл и конвертируем его в объект User
+                jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        logger.info("ожидаемый JSON на замену " + jsonData);
+
+        Map<String, String> user = new HashMap<>();
+        user.put("username", "admin");
+        user.put("password", "password123");
+        SuccessReg successReg = given()
+                .body(user)
+                .when()
+                .post("auth")
+                .then().log().all()
+                .extract().as(SuccessReg.class);
+        String token = successReg.getToken();
+        logger.info("Expected token id " + token + " has been received");
+
+        BookingData updatedBooking = given()
+                    .body(jsonData)
+                    .header("Cookie", "token=" + token)
+                    .when()
+                    .put("booking/" + bookingId)
+                    .then()
+                    .extract().as(BookingData.class);
+        Assertions.assertEquals("Alla Pugacheva", updatedBooking.getFirstname() + " " + updatedBooking.getLastname());
+        logger.info("The updated booking contains reservatoipn for " + updatedBooking.getFirstname() + " " + updatedBooking.getLastname());
     }
 }
