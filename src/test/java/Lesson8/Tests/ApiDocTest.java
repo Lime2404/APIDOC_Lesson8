@@ -4,6 +4,7 @@ import Lesson8.Pojo.BookingCreation;
 import Lesson8.Pojo.BookingData;
 import Lesson8.Specs.Specifications;
 import Lesson8.utils.ApiDocUtils;
+import Lesson8.utils.BookingCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,6 +82,18 @@ public class ApiDocTest {
     @Test
     @Tag("Test5")
     public void createPrivateBooking() {
+        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
+        BookingCreator creator = new BookingCreator();
+        BookingData booking = creator.createBooking();
+
+   ;   BookingCreation bookingCreation = given()
+                .body(booking)
+                .when()
+                .post("booking")
+                .then().log().all()
+                .extract().as(BookingCreation.class);
+        System.out.println(bookingCreation.bookingid);
+
     }
 
 //  5.6. Update booking using valid data
