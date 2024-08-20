@@ -82,18 +82,13 @@ public class ApiDocTest {
     @Test
     @Tag("Test5")
     public void createPrivateBooking() {
+        String firstname = "FirstNameBook1";
         Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
         BookingCreator creator = new BookingCreator();
-        BookingData booking = creator.createBooking();
-
-   ;   BookingCreation bookingCreation = given()
-                .body(booking)
-                .when()
-                .post("booking")
-                .then().log().all()
-                .extract().as(BookingCreation.class);
-        System.out.println(bookingCreation.bookingid);
-
+        BookingData booking = creator.createBooking(firstname);
+        String visitorFirstName = ApiDocUtils.createBooking(booking).booking.getFirstname();
+        Assertions.assertEquals(firstname, visitorFirstName);
+        logger.info("The booking contains expected first name " + visitorFirstName);
     }
 
 //  5.6. Update booking using valid data

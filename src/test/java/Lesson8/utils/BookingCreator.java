@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class BookingCreator {
-    public BookingData createBooking() {
+    public BookingData createBooking(String name) {
         // Создаем объект BookingDates
         BookingDates bookingDates = new BookingDates();
         bookingDates.setCheckin("2018-01-01");
@@ -14,7 +14,7 @@ public class BookingCreator {
 
         // Создаем объект Booking
         BookingData booking = new BookingData();
-        booking.setFirstname("Garik");
+        booking.setFirstname(name);
         booking.setLastname("Harlamov");
         booking.setTotalprice(111);
         booking.setDepositpaid(true);

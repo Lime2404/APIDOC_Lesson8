@@ -1,5 +1,6 @@
 package Lesson8.utils;
 
+import Lesson8.Pojo.BookingCreation;
 import Lesson8.Pojo.BookingData;
 import Lesson8.Pojo.Bookings;
 import Lesson8.Pojo.SuccessReg;
@@ -51,5 +52,15 @@ public class ApiDocUtils {
                 .then()
                 .extract().as(BookingData.class);
         return bookingData;
+    }
+
+    public static BookingCreation createBooking(BookingData object){
+        BookingCreation bookingCreation = given()
+                .body(object)
+                .when()
+                .post("booking")
+                .then().log().all()
+                .extract().as(BookingCreation.class);
+        return bookingCreation;
     }
 }
