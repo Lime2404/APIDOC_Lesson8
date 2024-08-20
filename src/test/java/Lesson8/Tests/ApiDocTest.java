@@ -2,9 +2,8 @@ package Lesson8.Tests;
 
 import Lesson8.Pojo.BookingCreation;
 import Lesson8.Pojo.BookingData;
-import Lesson8.Pojo.Bookings;
 import Lesson8.Specs.Specifications;
-import Lesson8.Pojo.SuccessReg;
+import Lesson8.utils.ApiDocUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,62 +12,39 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 
 public class ApiDocTest {
-    private String url = "https://restful-booker.herokuapp.com/";
+    private final String url = "https://restful-booker.herokuapp.com/";
     private static final Logger logger = LogManager.getLogger(ApiDocTest.class);
 
     @Test
     @Tag("Test1")
-    public void gettokenId() {
-        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
-        Map<String, String> user = new HashMap<>();
-        user.put("username", "admin");
-        user.put("password", "password123");
-        SuccessReg successReg = given()
-                .body(user)
-                .when()
-                .post("auth")
-                .then().log().all()
-                .extract().as(SuccessReg.class);
-//        System.out.println(successReg.getToken());
-        logger.info("Expected token id is received");
+
+    public void getApiDocTokenId() {
+        logger.info("The test1 has passed successfully, token " + ApiDocUtils.getTokenId(url) + " has been received");
     }
 
-    //  5.1. Get a list of all books and verify that the request was completed correctly
+//  5.1. Get a list of all books and verify that the request was completed correctly
     @Test
     @Tag("Test2")
-    public void getAllBookings() {
-        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
-        List<Bookings> bookings = given()
-                .when()
-                .get("booking")
-                .then()
-                .extract().body().jsonPath().getList("", Bookings.class);
-        List<Integer> ids = bookings.stream().map(x -> x.getBookingid()).collect(Collectors.toList());
-        Assertions.assertNotEquals(0, ids.size());
-        logger.info("The number of ids equals " + ids.size());
+
+    public void getAllApiDocBookings(){
+
+        int bookingListSize = ApiDocUtils.getAllBookings(url).size();
+        Assertions.assertNotEquals(0, bookingListSize);
+        logger.info("All bookings have been retreived successfully, the quantity of the bookings equals " + bookingListSize);
 
 //  5.2. From the resulting list, get a book by id (take a random id)
         Random random = new Random();
-        int randomIndex = random.nextInt(ids.size());
-        int randomValue = ids.get(randomIndex);
-        BookingData bookingData = given()
-                .when()
-                .get("booking/" + randomValue)
-                .then()
-//                .then().log().all()
-                .extract().as(BookingData.class);
-        Assertions.assertNotEquals(null, bookingData.getFirstname());
-        logger.info("The full name is " + bookingData.getFirstname() + " " + bookingData.getLastname());
-
+        int randomIndex = random.nextInt(bookingListSize);
+        int randomValue = ApiDocUtils.getAllBookings(url).get(randomIndex);
+        logger.info("The random booking id is " + randomValue);
+        String visitorLastName = ApiDocUtils.getBookingInfo(randomValue).lastname;
+        Assertions.assertNotEquals(null, visitorLastName);
+        logger.info("The test2 has passed successfully. The visitor's lastname is " + visitorLastName);
     }
 
 //  5.3. Create booking with valid data
@@ -112,44 +88,25 @@ public class ApiDocTest {
     @Tag("Test6")
     public void getBooking(){
         Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
-        List<Bookings> bookings = given()
-                .when()
-                .get("booking")
-                .then()
-                .extract().body().jsonPath().getList("", Bookings.class);
-        List<Integer> ids = bookings.stream().map(x -> x.getBookingid()).collect(Collectors.toList());
-        BookingData bookingData = given()
-                .when()
-                .get("booking/" + ids.get(0))
-                .then()
-//                .then().log().all()
-                .extract().as(BookingData.class);
-//        Assertions.assertNotEquals(null, bookingData.getFirstname());
-        int bookingId = ids.get(0);
-        logger.info("The booking id to be used is " + bookingId + " with full name " + bookingData.getFirstname() + " " + bookingData.getLastname());
+
+        String visitorLastName = ApiDocUtils.getBookingInfo(ApiDocUtils.getAllBookings(url).get(0)).lastname;
+        Assertions.assertNotEquals(null, visitorLastName);
+
+        int bookingId = ApiDocUtils.getAllBookings(url).get(0);
+        logger.info("The booking id to be used is " + bookingId + " with last name " + visitorLastName);
 
             File jsonFile = new File("src/test/resources/artifacts/Booking.json");
             String jsonData = null;
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                // Читаем JSON файл и конвертируем его в объект User
                 jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         logger.info("ожидаемый JSON на замену " + jsonData);
 
-        Map<String, String> user = new HashMap<>();
-        user.put("username", "admin");
-        user.put("password", "password123");
-        SuccessReg successReg = given()
-                .body(user)
-                .when()
-                .post("auth")
-                .then().log().all()
-                .extract().as(SuccessReg.class);
-        String token = successReg.getToken();
-        logger.info("Expected token id " + token + " has been received");
+        String token = ApiDocUtils.getTokenId(url);
+        logger.info("Следующий шаг - подставить токен " + token + " для внесения изменений в бронь");
 
         BookingData updatedBooking = given()
                     .body(jsonData)
@@ -159,6 +116,6 @@ public class ApiDocTest {
                     .then()
                     .extract().as(BookingData.class);
         Assertions.assertEquals("Alla Pugacheva", updatedBooking.getFirstname() + " " + updatedBooking.getLastname());
-        logger.info("The updated booking contains reservatoipn for " + updatedBooking.getFirstname() + " " + updatedBooking.getLastname());
+        logger.info("The updated booking with id: " + bookingId + " contains reservatoipn for " + updatedBooking.getLastname());
     }
 }
