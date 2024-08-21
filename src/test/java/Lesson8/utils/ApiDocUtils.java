@@ -5,8 +5,6 @@ import Lesson8.Pojo.BookingData;
 import Lesson8.Pojo.Bookings;
 import Lesson8.Pojo.SuccessReg;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
