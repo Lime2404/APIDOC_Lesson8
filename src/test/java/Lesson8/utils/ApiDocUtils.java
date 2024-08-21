@@ -4,9 +4,7 @@ import Lesson8.Pojo.BookingCreation;
 import Lesson8.Pojo.BookingData;
 import Lesson8.Pojo.Bookings;
 import Lesson8.Pojo.SuccessReg;
-import Lesson8.Specs.Specifications;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,8 +18,6 @@ import java.util.stream.Collectors;
 import static io.restassured.RestAssured.given;
 
 public class ApiDocUtils {
-    private static final Logger logger = LogManager.getLogger(ApiDocUtils.class);
-
     public static String getTokenId(String url) {
         Map<String, String> user = new HashMap<>();
         user.put("username", "admin");
@@ -55,28 +51,29 @@ public class ApiDocUtils {
         return bookingData;
     }
 
-    public static BookingCreation createBooking(Object object){
+    public static BookingCreation createBooking(Object object) {
         BookingCreation bookingCreation = given()
                 .body(object)
                 .when()
                 .post("booking")
-                .then().log().all()
+                .then()
                 .extract().as(BookingCreation.class);
         return bookingCreation;
     }
+
     public static String getJsonObject(String pathname) {
         File jsonFile = new File(pathname);
         String jsonData = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
-        } catch ( IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return jsonData;
     }
 
-    public static void updateWithInvalidData(String jsonData, String token, String resource, int statusCode){
+    public static void updateWithInvalidData(String jsonData, String token, String resource, int statusCode) {
         given()
                 .body(jsonData)
                 .header("Cookie", "token=" + token)
@@ -85,5 +82,17 @@ public class ApiDocUtils {
                 .then()
                 .assertThat()
                 .statusCode(statusCode);
+    }
+
+    public static String provideJsonData(String path){
+        File jsonFile = new File(path);
+        String jsonData = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return  jsonData;
     }
 }

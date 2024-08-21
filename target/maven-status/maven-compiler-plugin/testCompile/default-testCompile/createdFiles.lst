@@ -1,9 +1,10 @@
 Lesson8\Specs\Specifications.class
 Lesson8\Tests\ApiDocTest.class
+Lesson8\utils\BookingCreator.class
 Lesson8\Pojo\Bookings.class
 Lesson8\utils\ApiDocUtils.class
 Lesson8\Pojo\BookingCreation.class
 Lesson8\Pojo\SuccessReg.class
 Lesson8\Pojo\Authorisation.class
+Lesson8\Pojo\BookingDates.class
 Lesson8\Pojo\BookingData.class
-Lesson8\Pojo\Bookingdates.class

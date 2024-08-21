@@ -5,15 +5,12 @@ import Lesson8.Pojo.BookingData;
 import Lesson8.Specs.Specifications;
 import Lesson8.utils.ApiDocUtils;
 import Lesson8.utils.BookingCreator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 import static io.restassured.RestAssured.given;
@@ -29,7 +26,7 @@ public class ApiDocTest {
         logger.info("The test1 has passed successfully, token " + ApiDocUtils.getTokenId(url) + " has been received");
     }
 
-//  5.1. Get a list of all books and verify that the request was completed correctly
+    //  5.1. Get a list of all books and verify that the request was completed correctly
     @Test
     @Tag("Test2")
     public void getAllApiDocBookings() {
@@ -48,7 +45,7 @@ public class ApiDocTest {
         logger.info("The test2 has passed successfully. The visitor's lastname is " + visitorLastName);
     }
 
-//  5.3. Create booking with valid data
+    //  5.3. Create booking with valid data
     @Test
     @Tag("Test3")
     public void createBooking() {
@@ -59,7 +56,7 @@ public class ApiDocTest {
         logger.info("The booking id is " + booking.bookingid + ". The person full name is " + booking.booking.getFirstname() + " " + booking.booking.getLastname());
     }
 
-//  5.4. Create booking with invalid data
+    //  5.4. Create booking with invalid data
     @Test
     @Tag("Test4")
     public void postInvalidBooking() {
@@ -81,7 +78,7 @@ public class ApiDocTest {
         logger.info("The expected received status code for incorrect booking id is 404 - Not Found");
     }
 
-//  5.5. Create booking with firstname = FirstNameBook1
+    //  5.5. Create booking with firstname = FirstNameBook1
     @Test
     @Tag("Test5")
     public void createPrivateBooking() {
@@ -94,7 +91,7 @@ public class ApiDocTest {
         logger.info("The booking contains expected first name " + visitorFirstName);
     }
 
-//  5.6. Update booking using valid data
+    //  5.6. Update booking using valid data
     @Test
     @Tag("Test6")
     public void getBooking() {
@@ -104,14 +101,8 @@ public class ApiDocTest {
         int bookingId = ApiDocUtils.getAllBookings(url).get(0);
         logger.info("The booking id to be used is " + bookingId + " with last name " + visitorLastName);
 
-        File jsonFile = new File("src/test/resources/artifacts/Booking.json");
-        String jsonData = null;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }   logger.info("ожидаемый JSON на замену " + jsonData);
+       String jsonData= ApiDocUtils.provideJsonData("src/test/resources/artifacts/Booking.json");
+       logger.info("ожидаемый JSON на замену " + jsonData);
 
         String token = ApiDocUtils.getTokenId(url);
         logger.info("Следующий шаг - подставить токен " + token + " для внесения изменений в бронь");
