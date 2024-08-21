@@ -25,6 +25,7 @@ public class ApiDocTest {
     @Test
     @Tag("Test1")
     public void getApiDocTokenId() {
+        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
         logger.info("The test1 has passed successfully, token " + ApiDocUtils.getTokenId(url) + " has been received");
     }
 
@@ -32,7 +33,7 @@ public class ApiDocTest {
     @Test
     @Tag("Test2")
     public void getAllApiDocBookings() {
-
+        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
         int bookingListSize = ApiDocUtils.getAllBookings(url).size();
         Assertions.assertNotEquals(0, bookingListSize);
         logger.info("All bookings have been retreived successfully, the quantity of the bookings equals " + bookingListSize);
@@ -52,15 +53,7 @@ public class ApiDocTest {
     @Tag("Test3")
     public void createBooking() {
         Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
-        File jsonFile = new File("src/test/resources/artifacts/Booking.json");
-        String jsonData = null;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        String jsonData = ApiDocUtils.getJsonObject("src/test/resources/artifacts/Booking.json");
         BookingCreation booking = ApiDocUtils.createBooking(jsonData);
         Assertions.assertEquals("Alla", booking.booking.getFirstname());
         logger.info("The booking id is " + booking.bookingid + ". The person full name is " + booking.booking.getFirstname() + " " + booking.booking.getLastname());
@@ -70,6 +63,22 @@ public class ApiDocTest {
     @Test
     @Tag("Test4")
     public void postInvalidBooking() {
+        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseUnique(200));
+        String jsonData = ApiDocUtils.getJsonObject("src/test/resources/artifacts/Booking.json");
+        int bookingId = ApiDocUtils.getAllBookings(url).get(0);
+        Specifications.installSpecificationResponse(Specifications.responseUnique(403));
+        ApiDocUtils.updateWithInvalidData(jsonData, "12345", "booking/" + bookingId, 403);
+        logger.info("The expected received status code for incorrect token is 403 - Forbidden");
+
+        Specifications.installSpecificationResponse(Specifications.responseUnique(200));
+        String token = ApiDocUtils.getTokenId(url);
+        Specifications.installSpecificationResponse(Specifications.responseUnique(405));
+        ApiDocUtils.updateWithInvalidData(jsonData, token, "booking/" + 707070770, 405);
+        logger.info("The expected received status code for incorrect booking id is 405 - Method not allowed");
+
+        Specifications.installSpecificationResponse(Specifications.responseUnique(404));
+        ApiDocUtils.updateWithInvalidData(jsonData, token, "invalid", 404);
+        logger.info("The expected received status code for incorrect booking id is 404 - Not Found");
     }
 
 //  5.5. Create booking with firstname = FirstNameBook1

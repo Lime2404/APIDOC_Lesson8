@@ -5,9 +5,13 @@ import Lesson8.Pojo.BookingData;
 import Lesson8.Pojo.Bookings;
 import Lesson8.Pojo.SuccessReg;
 import Lesson8.Specs.Specifications;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +23,6 @@ public class ApiDocUtils {
     private static final Logger logger = LogManager.getLogger(ApiDocUtils.class);
 
     public static String getTokenId(String url) {
-        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
         Map<String, String> user = new HashMap<>();
         user.put("username", "admin");
         user.put("password", "password123");
@@ -30,12 +33,10 @@ public class ApiDocUtils {
                 .then()
                 .extract().as(SuccessReg.class);
         String token = successReg.getToken();
-        logger.info("Expected token id " + token + " has been received");
         return token;
     }
 
     public static List<Integer> getAllBookings(String url) {
-        Specifications.installSpecification(Specifications.requestSpec(url), Specifications.responseOK200());
         List<Bookings> bookings = given()
                 .when()
                 .get("booking")
@@ -62,5 +63,27 @@ public class ApiDocUtils {
                 .then().log().all()
                 .extract().as(BookingCreation.class);
         return bookingCreation;
+    }
+    public static String getJsonObject(String pathname) {
+        File jsonFile = new File(pathname);
+        String jsonData = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonData = objectMapper.writeValueAsString(objectMapper.readTree(jsonFile));
+        } catch ( IOException e) {
+            e.printStackTrace();
+        }
+        return jsonData;
+    }
+
+    public static void updateWithInvalidData(String jsonData, String token, String resource, int statusCode){
+        given()
+                .body(jsonData)
+                .header("Cookie", "token=" + token)
+                .when()
+                .put(resource)
+                .then()
+                .assertThat()
+                .statusCode(statusCode);
     }
 }
